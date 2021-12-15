@@ -13,9 +13,7 @@ import {
   View,
 } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
-import VIForegroundService from '@voximplant/react-native-foreground-service';
 
-import MapView from './MapView';
 import appConfig from '../app.json';
 
 export default function App() {
@@ -147,11 +145,10 @@ export default function App() {
       return;
     }
 
-    if (Platform.OS === 'android' && foregroundService) {
-      await startForegroundService();
-    }
-
     setObserving(true);
+
+    const backgroundService = Platform.OS === 'android' && foregroundService;
+    const foregroundLocationServiceRef = 'enabled';
 
     watchId.current = Geolocation.watchPosition(
       (position) => {
@@ -175,46 +172,35 @@ export default function App() {
         forceLocationManager: useLocationManager,
         showLocationDialog: locationDialog,
         useSignificantChanges: significantChanges,
+        asService: backgroundService,
+        serviceAsForeground:
+          backgroundService && foregroundLocationServiceRef === 'enabled',
+        ignoredBatteryOptimization:
+          backgroundService && foregroundLocationServiceRef === 'enabled',
+        foregroundNotificationTitle: 'SIA',
+        foregroundNotificationDescription:
+          'Sistema de Marcación y Control de Capital Humano',
+        foregroundNotificationSmallIcon: 'ic_launcher',
+        foregroundNotificationLargeIcon: 'ic_launcher',
+        foregroundNotificationColor: '#666666',
+        notificationBroadcastReceiverClassName:
+          'com.geoloc.receiver.NotificationBroadcastReceiver',
+        routeInterval: 25000,
+        routeFastestInterval: 20000,
       },
     );
   };
 
   const removeLocationUpdates = useCallback(() => {
     if (watchId.current !== null) {
-      stopForegroundService();
       Geolocation.clearWatch(watchId.current);
       watchId.current = null;
       setObserving(false);
     }
-  }, [stopForegroundService]);
-
-  const startForegroundService = async () => {
-    if (Platform.Version >= 26) {
-      await VIForegroundService.createNotificationChannel({
-        id: 'locationChannel',
-        name: 'Location Tracking Channel',
-        description: 'Tracks location of user',
-        enableVibration: false,
-      });
-    }
-
-    return VIForegroundService.startService({
-      channelId: 'locationChannel',
-      id: 420,
-      title: appConfig.displayName,
-      text: 'Tracking location updates',
-      icon: 'ic_launcher',
-    });
-  };
-
-  const stopForegroundService = useCallback(() => {
-    VIForegroundService.stopService().catch((err) => err);
   }, []);
 
   return (
     <View style={styles.mainContainer}>
-      <MapView coords={location?.coords || null} />
-
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}

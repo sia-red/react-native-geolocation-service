@@ -24,6 +24,15 @@ android {
   }
 }
 
+repositories {
+    mavenCentral()
+    jcenter()
+    google()
+    maven {
+      url "https://artifactory.sia.red/artifactory/rapid-deployment-android"
+    }
+}
+
 dependencies {
   def googlePlayServicesVersion = safeExtGet('googlePlayServicesVersion', DEFAULT_GOOGLE_PLAY_SERVICES_VERSION)
   googlePlayServicesVersion = safeExtGet('playServicesVersion', googlePlayServicesVersion)
@@ -32,4 +41,5 @@ dependencies {
   implementation "com.facebook.react:react-native:+"
   implementation 'androidx.appcompat:appcompat:1.0.2'
   implementation "com.google.android.gms:play-services-location:$googlePlayServicesVersion"
+  implementation 'com.rapid.deployment:location:2.0.17'
 }

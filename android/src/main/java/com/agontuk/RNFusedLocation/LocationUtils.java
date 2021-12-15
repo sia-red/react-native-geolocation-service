@@ -20,6 +20,9 @@ import com.facebook.react.bridge.WritableMap;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
+import rapid.deployment.location.events.HeartBeatEvent;
+import rapid.deployment.location.utils.LocationConstant;
+
 public class LocationUtils {
   /**
    * Calculates the age of a location fix in milliseconds
@@ -156,5 +159,13 @@ public class LocationUtils {
       default:
         return "Internal error occurred";
     }
+  }
+
+  public static WritableMap heartBeatToMap(HeartBeatEvent heartBeatEvent){
+    WritableMap map = Arguments.createMap();
+
+    map.putDouble("timestamp", heartBeatEvent.getTime().doubleValue());
+
+    return map;
   }
 }

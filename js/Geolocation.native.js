@@ -1,4 +1,4 @@
-import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
+import { NativeEventEmitter, NativeModules, Platform } from "react-native";
 
 const { RNFusedLocation } = NativeModules;
 const LocationEventEmitter = new NativeEventEmitter(RNFusedLocation);
@@ -11,13 +11,13 @@ const Geolocation = {
   setRNConfiguration: (config) => {}, // eslint-disable-line no-unused-vars
 
   requestAuthorization: async (authorizationLevel) => {
-    if (Platform.OS !== 'ios') {
-      return Promise.reject('requestAuthorization is only for iOS');
+    if (Platform.OS !== "ios") {
+      return Promise.reject("requestAuthorization is only for iOS");
     }
 
     if (!authorizationLevel) {
       // eslint-disable-next-line no-console
-      console.error('authorizationLevel must be provided');
+      console.error("authorizationLevel must be provided");
     }
 
     return RNFusedLocation.requestAuthorization(authorizationLevel);
@@ -26,7 +26,7 @@ const Geolocation = {
   getCurrentPosition: (success, error = noop, options = {}) => {
     if (!success) {
       // eslint-disable-next-line no-console
-      console.error('Must provide a success callback');
+      console.error("Must provide a success callback");
     }
 
     // Right now, we're assuming user already granted location permission.
@@ -36,7 +36,7 @@ const Geolocation = {
   watchPosition: (success, error = null, options = {}) => {
     if (!success) {
       // eslint-disable-next-line no-console
-      console.error('Must provide a success callback');
+      console.error("Must provide a success callback");
     }
 
     if (!updatesEnabled) {
@@ -47,8 +47,10 @@ const Geolocation = {
     const watchID = subscriptions.length;
 
     subscriptions.push([
-      LocationEventEmitter.addListener('geolocationDidChange', success),
-      error ? LocationEventEmitter.addListener('geolocationError', error) : null
+      LocationEventEmitter.addListener("geolocationDidChange", success),
+      error
+        ? LocationEventEmitter.addListener("geolocationError", error)
+        : null,
     ]);
 
     return watchID;
@@ -87,6 +89,7 @@ const Geolocation = {
   },
 
   stopObserving: () => {
+    RNFusedLocation.stopService();
     if (updatesEnabled) {
       RNFusedLocation.stopObserving();
       updatesEnabled = false;
@@ -95,7 +98,7 @@ const Geolocation = {
         const sub = subscriptions[ii];
         if (sub) {
           // eslint-disable-next-line no-console
-          console.warn('Called stopObserving with existing subscriptions.');
+          console.warn("Called stopObserving with existing subscriptions.");
           sub[0].remove();
 
           const sub1 = sub[1];
@@ -108,7 +111,11 @@ const Geolocation = {
 
       subscriptions = [];
     }
-  }
+  },
+
+  stopService: () => {
+    RNFusedLocation.stopService();
+  },
 };
 
 export default Geolocation;
